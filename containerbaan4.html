@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Containerbaan 4 – Beoordeling</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --ov:#D97706;--ov-bg:#FEF3C7;--ov-txt:#78350F;
+  --vol:#378ADD;--vol-bg:#E6F1FB;--vol-txt:#0C447C;
+  --goed:#639922;--goed-bg:#EAF3DE;--goed-txt:#27500A;
+  --teal:#1D9E75;
+  --bg:#f4f4f2;--surface:#fff;--border:rgba(0,0,0,0.1);
+  --text:#1a1a18;--text2:#6b6b66;--text3:#aaa;
+  --r:12px;--rs:8px
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'Helvetica Neue',sans-serif;min-height:100vh;font-size:14px}
+
+/* Layout */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+.scroll{flex:1;overflow-y:auto;padding:16px;max-width:540px;width:100%;margin:0 auto}
+
+/* Header */
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
+.hdr-back{background:none;border:none;font-size:22px;cursor:pointer;color:var(--teal);padding:0;line-height:1;font-family:inherit}
+.hdr-title{font-weight:700;font-size:15px;flex:1}
+
+/* Hero */
+.hero{background:var(--teal);padding:24px 16px 20px;color:#fff}
+.hero h1{font-size:22px;font-weight:800;margin:4px 0 2px}
+.hero .sub{font-size:11px;opacity:.7}
+
+/* Progress */
+.prog{height:3px;background:rgba(0,0,0,.1);border-radius:2px;margin-top:8px}
+.prog-fill{height:3px;background:var(--teal);border-radius:2px;width:0%;transition:width .3s}
+
+/* Tabs */
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border)}
+.tab-btn{flex:1;padding:10px 4px;font-size:12px;border:none;background:transparent;color:var(--text3);cursor:pointer;font-family:inherit;font-weight:600;border-bottom:2px solid transparent;transition:all .15s}
+.tab-btn.active{color:var(--teal);border-bottom-color:var(--teal);font-weight:700}
+
+/* Cards */
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text)}
+.card-sub{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+
+/* Form fields */
+.field{margin-bottom:10px}
+.field label{display:block;font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600}
+.inp{width:100%;padding:9px 11px;font-size:14px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg);color:var(--text);font-family:inherit}
+.inp:focus{outline:none;border-color:var(--teal)}
+textarea.inp{resize:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* Score buttons */
+.score-row{display:flex;gap:6px;margin:8px 0}
+.sbtn{flex:1;padding:9px 4px;font-size:12px;font-weight:700;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg);color:var(--text2);cursor:pointer;font-family:inherit;transition:all .1s}
+.sbtn.sel-ov{background:var(--ov-bg);border-color:var(--ov);color:var(--ov-txt)}
+.sbtn.sel-vol{background:var(--vol-bg);border-color:var(--vol);color:var(--vol-txt)}
+.sbtn.sel-goed{background:var(--goed-bg);border-color:var(--goed);color:var(--goed-txt)}
+
+/* Person row */
+.p-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--border)}
+.p-name{font-size:12px;color:var(--text2);flex:1}
+.p-btns{display:flex;gap:4px}
+.pbtn{padding:5px 9px;font-size:11px;font-weight:700;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg);color:var(--text2);cursor:pointer;font-family:inherit;min-width:30px;text-align:center;transition:all .1s}
+.pbtn.sel-ov{background:var(--ov-bg);border-color:var(--ov);color:var(--ov-txt)}
+.pbtn.sel-vol{background:var(--vol-bg);border-color:var(--vol);color:var(--vol-txt)}
+.pbtn.sel-goed{background:var(--goed-bg);border-color:var(--goed);color:var(--goed-txt)}
+
+/* Aandacht note */
+.a-note{width:100%;padding:6px 8px;font-size:11px;border:1px solid var(--ov);border-radius:var(--rs);background:var(--ov-bg);color:var(--text);font-family:inherit;resize:none;margin-top:2px}
+.a-note:focus{outline:none}
+
+/* Badges */
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.b-ov{background:var(--ov-bg);color:var(--ov-txt);border:1px solid var(--ov)}
+.b-vol{background:var(--vol-bg);color:var(--vol-txt);border:1px solid var(--vol)}
+.b-goed{background:var(--goed-bg);color:var(--goed-txt);border:1px solid var(--goed)}
+.b-none{background:var(--border);color:var(--text3)}
+
+/* Mini bar */
+.mbar-wrap{margin-bottom:8px}
+.mbar-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:3px;align-items:center;gap:4px}
+.mbar-meta span:first-child{flex:1}
+.mbar-bg{height:5px;background:var(--bg);border-radius:3px}
+.mbar-fill{height:5px;border-radius:3px;transition:width .3s}
+
+/* Tiptop */
+.tiptop{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.tiptop label{font-size:10px;color:var(--text2);display:block;margin-bottom:3px;font-weight:700}
+.tiptop .inp{font-size:11px;padding:6px 8px}
+
+/* Buttons */
+.btn{width:100%;padding:13px;font-size:14px;font-weight:700;border:none;border-radius:var(--r);cursor:pointer;font-family:inherit;margin-bottom:8px;transition:opacity .15s}
+.btn:active{opacity:.85}
+.btn-primary{background:var(--teal);color:#fff}
+.btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn-danger{background:var(--ov-bg);color:var(--ov-txt);border:1px solid var(--ov)}
+
+/* Result big */
+.result-big{font-size:30px;font-weight:800;line-height:1}
+.result-lbl{font-size:11px;color:var(--text2);margin-top:4px}
+
+/* Aandacht card */
+.a-card{background:var(--ov-bg);border:1px solid var(--ov);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.a-card .card-title{color:var(--ov-txt)}
+.a-item{font-size:12px;color:var(--ov-txt);padding:6px 0;border-top:1px solid rgba(217,119,6,.2);line-height:1.6}
+.a-item:first-of-type{border-top:none}
+
+/* Oefen card */
+.o-card{background:var(--vol-bg);border:1px solid var(--vol);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.o-card .card-title{color:var(--vol-txt)}
+.o-kaart{background:#fff;border-radius:var(--rs);border:1px solid #c5dcf5;padding:10px 12px;margin-bottom:8px}
+.o-kaart:last-child{margin-bottom:0}
+.o-code{font-size:11px;font-weight:800;color:var(--vol);font-family:monospace;margin-bottom:2px}
+.o-titel{font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px}
+.o-tags{display:flex;flex-wrap:wrap;gap:4px}
+.o-tag{font-size:10px;background:var(--vol-bg);color:var(--vol-txt);border-radius:6px;padding:2px 7px;font-weight:600}
+
+/* Session list */
+.sess-row{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:8px}
+.sess-meta{font-size:11px;color:var(--text2);margin-top:2px}
+.sess-actions{display:flex;gap:6px;margin-top:10px}
+.sess-actions button{flex:1;padding:7px 0;font-size:12px;font-weight:600;border-radius:var(--rs);cursor:pointer;font-family:inherit;border:1px solid var(--border);background:var(--bg);color:var(--text)}
+.sess-actions .del-btn{background:var(--ov-bg);border-color:var(--ov);color:var(--ov-txt);flex:0;padding:7px 14px}
+
+/* Divider */
+.divider{height:1px;background:var(--border);margin:12px 0}
+
+/* Empty */
+.empty{text-align:center;color:var(--text3);font-size:13px;padding:32px 0}
+</style>
+</head>
+<body>
+
+<!-- ═══ SCREEN: HOME ═══ -->
+<div id="scr-home" class="screen active">
+  <div class="hero">
+    <div style="font-size:11px;opacity:.8;margin-bottom:4px">Manschap A – Brandbestrijding</div>
+    <h1>Containerbaan 4</h1>
+    <div class="sub">De witte boekenhandel</div>
+  </div>
+  <div class="scroll">
+    <button class="btn btn-primary" onclick="startNieuw()">+ Nieuwe training beoordelen</button>
+    <button class="btn btn-secondary" onclick="showScreen('scr-history')" id="btn-history">Alle trainingen (0)</button>
+    <div id="recent-block"></div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN: FORM ═══ -->
+<div id="scr-form" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="showScreen('scr-home')">←</button>
+    <div class="hdr-title">Containerbaan 4</div>
+    <div id="form-badge"></div>
+  </div>
+  <div class="prog"><div class="prog-fill" id="form-prog"></div></div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="formTab('info')">Info</button>
+    <button class="tab-btn" onclick="formTab('criteria')">Criteria</button>
+    <button class="tab-btn" onclick="formTab('resultaat')">Resultaat</button>
+  </div>
+
+  <!-- Info tab -->
+  <div id="ft-info" class="scroll">
+    <div class="card">
+      <div class="card-title">Algemeen</div>
+      <div class="field"><label>Datum</label><input type="date" class="inp" id="f-datum"></div>
+      <div class="field"><label>Waarnemer 1</label><input type="text" class="inp" id="f-wn1" placeholder="Naam"></div>
+      <div class="field"><label>Waarnemer 2 (optioneel)</label><input type="text" class="inp" id="f-wn2" placeholder="Naam"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Bezetting</div>
+      <div class="grid2">
+        <div class="field"><label>B – Bevelvoerder</label><input type="text" class="inp pos-inp" data-pos="B" placeholder="Naam"></div>
+        <div class="field"><label>P – Pompbediener</label><input type="text" class="inp pos-inp" data-pos="P" placeholder="Naam"></div>
+        <div class="field"><label>Positie 1</label><input type="text" class="inp pos-inp" data-pos="1" placeholder="Naam"></div>
+        <div class="field"><label>Positie 2</label><input type="text" class="inp pos-inp" data-pos="2" placeholder="Naam"></div>
+        <div class="field"><label>Positie 3</label><input type="text" class="inp pos-inp" data-pos="3" placeholder="Naam"></div>
+        <div class="field"><label>Positie 4</label><input type="text" class="inp pos-inp" data-pos="4" placeholder="Naam"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="formTab('criteria')">Naar beoordeling →</button>
+  </div>
+
+  <!-- Criteria tab -->
+  <div id="ft-criteria" class="scroll" style="display:none">
+    <div id="crit-container"></div>
+    <button class="btn btn-primary" onclick="formTab('resultaat')">Bekijk resultaat →</button>
+  </div>
+
+  <!-- Resultaat tab -->
+  <div id="ft-resultaat" class="scroll" style="display:none">
+    <div id="res-content"></div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN: HISTORY ═══ -->
+<div id="scr-history" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="showScreen('scr-home')">←</button>
+    <div class="hdr-title">Trainingsoverzicht</div>
+  </div>
+  <div class="scroll" id="history-content"></div>
+</div>
+
+<!-- ═══ SCREEN: DETAIL ═══ -->
+<div id="scr-detail" class="screen">
+  <div class="hdr">
+    <button class="hdr-back" onclick="showScreen('scr-history')">←</button>
+    <div class="hdr-title" id="det-title">Detail</div>
+    <div id="det-badge"></div>
+  </div>
+  <div class="scroll" id="detail-content"></div>
+</div>
+
+<script>
+// ═══ DATA ═══
+var CRITERIA = [
+  {id:'c1',nr:1,title:'Verkenning & terugkoppeling',   desc:'360° verkenning toegepast; bevindingen teruggekoppeld aan bevelvoerder.'},
+  {id:'c2',nr:2,title:'Aflegsystemen & blustechniek',  desc:'Aflegsystemen conform RGA; juiste blustechniek (TA) toegepast.'},
+  {id:'c3',nr:3,title:'Herkennen van gevaren',          desc:'Gebouwkenmerken, kwadrantenmodel, kenmerkenschema, ABCD-zijden.'},
+  {id:'c4',nr:4,title:'Veilig werken',                  desc:'Adequate veiligheidsmaatregelen voor en tijdens uitvoering.'},
+  {id:'c5',nr:5,title:'Communicatie & rapportage',      desc:'Tijdig relevante info bij veranderingen; CAN-methodiek toegepast.'}
+];
+var KAARTEN = [
+  {code:'VRR-MS-01-BB-01', titel:'Aflegsysteem',                                          crit:['c2']},
+  {code:'VRR-MS-02-BB-02', titel:'Hoge en bijzondere gebouwen',                           crit:['c3']},
+  {code:'VRR-MS-03-BB-03', titel:'Brandverloop en brandgedrag',                           crit:['c3','c4']},
+  {code:'VRR-MS-04-BB-04', titel:'Straalpijpvoering',                                     crit:['c2']},
+  {code:'VRR-MS-05-BB-05', titel:'Constructies van gebouwen in eigen verzorgingsgebied',  crit:['c3','c4']},
+  {code:'VRR-MS-06-BB-06', titel:'Adembescherming, verkenningtechnieken en communicatie', crit:['c1','c4','c5']},
+  {code:'VRR-MS-07-BB-07', titel:'Natuurlijke ventilatie en ventilatietechnieken',        crit:['c3','c4']},
+  {code:'VRR-MS-08-BB-08', titel:'Inzetoefening - verkenningtechnieken',                  crit:['c1','c3']},
+  {code:'VRR-MS-09-BB-09', titel:'Inzetoefening - communicatie en samenwerking',          crit:['c1','c5']}
+];
+var POSITIONS = ['B','P','1','2','3','4'];
+var SL = {ov:'Aandacht', vol:'Voldoende', goed:'Goed'};
+var SV = {ov:1, vol:2, goed:3};
+var STORAGE_KEY = 'cb4v2_sessions';
+
+var sessions = [];
+var form = {};
+var currentTab = 'info';
+
+// ═══ STORAGE ═══
+function loadSessions() {
+  try { sessions = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { sessions = []; }
+}
+function saveSessions() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions)); } catch {}
+}
+
+// ═══ SCORE HELPERS ═══
+function oo(scores) {
+  // scores = array of 'ov'|'vol'|'goed' strings
+  if (!scores.length) return null;
+  var nA = 0; for (var i=0;i<scores.length;i++) if (scores[i]==='ov') nA++;
+  if (nA > scores.length/2) return 'ov';
+  var sum=0; for (var i=0;i<scores.length;i++) sum+=SV[scores[i]];
+  var avg = sum/scores.length;
+  return avg>=2.5?'goed':avg>=1.5?'vol':'ov';
+}
+function ooNum(scores) {
+  if (!scores.length) return null;
+  var sum=0; for (var i=0;i<scores.length;i++) sum+=SV[scores[i]];
+  return sum/scores.length;
+}
+function sessOo(s) {
+  var filled=[];
+  for (var i=0;i<CRITERIA.length;i++) if (s.scores[CRITERIA[i].id]) filled.push(s.scores[CRITERIA[i].id]);
+  if (!filled.length) return null;
+  var nA=0; for (var i=0;i<filled.length;i++) if (filled[i]==='ov') nA++;
+  var forced = nA > filled.length/2;
+  var sum=0; for (var i=0;i<filled.length;i++) sum+=SV[filled[i]];
+  var num = sum/filled.length;
+  var ord = forced?'ov':num>=2.5?'goed':num>=1.5?'vol':'ov';
+  return {ord:ord, num:forced?null:num};
+}
+function badgeCls(v) { return 'badge b-'+(v||'none'); }
+function ooBg(v)  { return v==='goed'?'var(--goed)':v==='vol'?'var(--vol)':'var(--ov)'; }
+
+// ═══ FORM STATE ═══
+function newForm() {
+  form = {
+    datum: new Date().toISOString().split('T')[0],
+    wn1:'', wn2:'',
+    bez:{B:'',P:'','1':'','2':'','3':'','4':''},
+    scores:{}, notes:{}, tops:{}, tips:{},
+    pscores:{}, pnotes:{},
+    eindopmerking:''
+  };
+}
+function getPositions() {
+  var r=[];
+  for (var i=0;i<POSITIONS.length;i++) {
+    var n = form.bez[POSITIONS[i]]||'';
+    if (n.trim()) r.push({pos:POSITIONS[i], name:n.trim()});
+  }
+  return r;
+}
+
+// ═══ SCREENS ═══
+function showScreen(id) {
+  var ss = document.querySelectorAll('.screen');
+  for (var i=0;i<ss.length;i++) ss[i].classList.remove('active');
+  document.getElementById(id).classList.add('active');
+  if (id==='scr-home') renderHome();
+  if (id==='scr-history') renderHistory();
+}
+
+// ═══ HOME ═══
+function renderHome() {
+  document.getElementById('btn-history').textContent = 'Alle trainingen ('+sessions.length+')';
+  var rb = document.getElementById('recent-block');
+  if (!sessions.length) { rb.innerHTML=''; return; }
+  var html = '<div class="card-sub" style="margin-bottom:8px">Recente trainingen</div>';
+  var show = sessions.slice(0,3);
+  for (var i=0;i<show.length;i++) {
+    var s=show[i], r=sessOo(s);
+    html += '<div class="sess-row" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">';
+    html += '<div><div style="font-size:13px;font-weight:700">'+(s.datum||'–')+'</div>';
+    html += '<div class="sess-meta">'+(s.wn1||'Geen waarnemer')+'</div></div>';
+    if (r) html += '<span class="'+badgeCls(r.ord)+'">'+(r.num?r.num.toFixed(1)+' – ':'')+SL[r.ord]+'</span>';
+    html += '</div>';
+  }
+  rb.innerHTML = html;
+}
+
+// ═══ START FORM ═══
+function startNieuw() {
+  newForm();
+  // Sync datum field
+  document.getElementById('f-datum').value = form.datum;
+  document.getElementById('f-wn1').value = '';
+  document.getElementById('f-wn2').value = '';
+  var pInps = document.querySelectorAll('.pos-inp');
+  for (var i=0;i<pInps.length;i++) pInps[i].value = '';
+  formTab('info');
+  showScreen('scr-form');
+}
+
+// ═══ FORM TABS ═══
+function formTab(name) {
+  currentTab = name;
+  var tabs = ['info','criteria','resultaat'];
+  var btns = document.querySelectorAll('.tab-btn');
+  for (var i=0;i<tabs.length;i++) {
+    document.getElementById('ft-'+tabs[i]).style.display = tabs[i]===name?'block':'none';
+    btns[i].className = 'tab-btn'+(tabs[i]===name?' active':'');
+  }
+  if (name==='criteria') buildCriteria();
+  if (name==='resultaat') buildResultaat();
+}
+
+// ═══ SYNC FORM FIELDS ═══
+function syncInfo() {
+  form.datum = document.getElementById('f-datum').value;
+  form.wn1   = document.getElementById('f-wn1').value;
+  form.wn2   = document.getElementById('f-wn2').value;
+  var pInps = document.querySelectorAll('.pos-inp');
+  for (var i=0;i<pInps.length;i++) {
+    form.bez[pInps[i].dataset.pos] = pInps[i].value.trim();
+  }
+}
+
+// ═══ BUILD CRITERIA ═══
+function buildCriteria() {
+  syncInfo();
+  var positions = getPositions();
+  var html = '';
+  for (var ci=0;ci<CRITERIA.length;ci++) {
+    var c = CRITERIA[ci];
+    var s = form.scores[c.id]||'';
+    var bdg = s ? '<span class="'+badgeCls(s)+'">'+SL[s]+'</span>' : '';
+    html += '<div class="card" id="cc-'+c.id+'">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">';
+    html += '<div style="font-size:13px;font-weight:700"><span style="color:var(--text3);margin-right:3px">'+c.nr+'.</span>'+c.title+'</div>';
+    html += '<div id="cbdg-'+c.id+'">'+bdg+'</div></div>';
+    html += '<div style="font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:8px">'+c.desc+'</div>';
+    html += '<div class="score-row">';
+    html += '<button class="sbtn'+(s==='ov'?' sel-ov':'')+'" onclick="setScore(\''+c.id+'\',\'ov\',this)">⚠ Aandacht</button>';
+    html += '<button class="sbtn'+(s==='vol'?' sel-vol':'')+'" onclick="setScore(\''+c.id+'\',\'vol\',this)">Voldoende</button>';
+    html += '<button class="sbtn'+(s==='goed'?' sel-goed':'')+'" onclick="setScore(\''+c.id+'\',\'goed\',this)">Goed</button>';
+    html += '</div>';
+    html += '<textarea class="inp" rows="2" placeholder="Opmerking..." onchange="form.notes[\''+c.id+'\']=this.value" style="margin-bottom:8px">'+(form.notes[c.id]||'')+'</textarea>';
+    html += '<div class="tiptop">';
+    html += '<div><label>👍 Top</label><input type="text" class="inp" placeholder="Sterk punt..." value="'+(form.tops[c.id]||'')+'" onchange="form.tops[\''+c.id+'\']=this.value"></div>';
+    html += '<div><label>💡 Tip</label><input type="text" class="inp" placeholder="Verbeterpunt..." value="'+(form.tips[c.id]||'')+'" onchange="form.tips[\''+c.id+'\']=this.value"></div>';
+    html += '</div>';
+    // Per persoon
+    if (positions.length) {
+      html += '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">';
+      html += '<div class="card-sub" style="margin-bottom:6px">Per persoon</div>';
+      for (var pi=0;pi<positions.length;pi++) {
+        var p=positions[pi], key=c.id+'_'+p.pos, ps=form.pscores[key]||'', pn=form.pnotes[key]||'';
+        html += '<div id="pr-'+c.id+'-'+p.pos+'">';
+        html += '<div class="p-row"><span class="p-name"><b>'+p.pos+'</b> – '+p.name+'</span>';
+        html += '<div class="p-btns">';
+        html += '<button class="pbtn'+(ps==='ov'?' sel-ov':'')+'" onclick="setPScore(\''+c.id+'\',\''+p.pos+'\',\'ov\',this)">A</button>';
+        html += '<button class="pbtn'+(ps==='vol'?' sel-vol':'')+'" onclick="setPScore(\''+c.id+'\',\''+p.pos+'\',\'vol\',this)">V</button>';
+        html += '<button class="pbtn'+(ps==='goed'?' sel-goed':'')+'" onclick="setPScore(\''+c.id+'\',\''+p.pos+'\',\'goed\',this)">G</button>';
+        html += '</div></div>';
+        html += '<div id="pn-'+c.id+'-'+p.pos+'" style="'+(ps==='ov'?'':'display:none')+'"><textarea class="a-note" rows="2" placeholder="Aandachtspunt '+p.name+'..." onchange="form.pnotes[\''+key+'\']=this.value">'+pn+'</textarea></div>';
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  document.getElementById('crit-container').innerHTML = html;
+  updateProgress();
+}
+
+// ═══ SET SCORE ═══
+function setScore(cid, val, btn) {
+  form.scores[cid] = val;
+  var row = btn.parentElement.querySelectorAll('.sbtn');
+  for (var i=0;i<row.length;i++) row[i].className='sbtn';
+  btn.className = 'sbtn sel-'+val;
+  document.getElementById('cbdg-'+cid).innerHTML = '<span class="'+badgeCls(val)+'">'+SL[val]+'</span>';
+  updateProgress();
+  updateFormBadge();
+}
+
+function setPScore(cid, pos, val, btn) {
+  var key = cid+'_'+pos;
+  form.pscores[key] = val;
+  var btns = btn.parentElement.querySelectorAll('.pbtn');
+  for (var i=0;i<btns.length;i++) btns[i].className='pbtn';
+  btn.className = 'pbtn sel-'+val;
+  // show/hide note
+  var noteEl = document.getElementById('pn-'+cid+'-'+pos);
+  if (noteEl) {
+    noteEl.style.display = val==='ov'?'block':'none';
+    if (val!=='ov') { form.pnotes[key]=''; var ta=noteEl.querySelector('textarea'); if(ta) ta.value=''; }
+  }
+  // auto-calc group score from person scores
+  var positions = getPositions();
+  var pList=[];
+  for (var i=0;i<positions.length;i++) { var ps=form.pscores[cid+'_'+positions[i].pos]; if(ps) pList.push(ps); }
+  if (pList.length) {
+    var autoVal = oo(pList);
+    form.scores[cid] = autoVal;
+    var card = document.getElementById('cc-'+cid);
+    if (card) {
+      var sbtns = card.querySelectorAll('.score-row .sbtn');
+      for (var i=0;i<sbtns.length;i++) sbtns[i].className='sbtn';
+      var idx = {ov:0,vol:1,goed:2}[autoVal];
+      if (sbtns[idx]) sbtns[idx].className='sbtn sel-'+autoVal;
+      document.getElementById('cbdg-'+cid).innerHTML='<span class="'+badgeCls(autoVal)+'">'+SL[autoVal]+'</span>';
+    }
+    updateProgress();
+    updateFormBadge();
+  }
+}
+
+function updateProgress() {
+  var n=0; for (var i=0;i<CRITERIA.length;i++) if (form.scores[CRITERIA[i].id]) n++;
+  document.getElementById('form-prog').style.width = Math.round(n/CRITERIA.length*100)+'%';
+}
+
+function updateFormBadge() {
+  var filled=[];
+  for (var i=0;i<CRITERIA.length;i++) if (form.scores[CRITERIA[i].id]) filled.push(form.scores[CRITERIA[i].id]);
+  var el = document.getElementById('form-badge');
+  if (!filled.length) { el.innerHTML=''; return; }
+  var ord = oo(filled), num = ooNum(filled);
+  var nA=0; for(var i=0;i<filled.length;i++) if(filled[i]==='ov') nA++;
+  var forced = nA > filled.length/2;
+  el.innerHTML = '<span class="'+badgeCls(ord)+'">'+((!forced&&num)?num.toFixed(1)+' – ':'')+SL[ord]+'</span>';
+}
+
+// ═══ OEFENKAARTEN HTML ═══
+function buildOefen(aandachtIds) {
+  if (!aandachtIds.length) return '';
+  var relevant = [];
+  for (var i=0;i<KAARTEN.length;i++) {
+    for (var j=0;j<KAARTEN[i].crit.length;j++) {
+      if (aandachtIds.indexOf(KAARTEN[i].crit[j])>=0) { relevant.push(KAARTEN[i]); break; }
+    }
+  }
+  if (!relevant.length) return '';
+  var html = '<div class="o-card"><div class="card-title">🎯 Oefenkaarten</div>';
+  html += '<div style="font-size:11px;color:var(--vol-txt);margin-bottom:10px;opacity:.8">Oefen deze kaarten om de aandachtspunten te verbeteren:</div>';
+  for (var i=0;i<relevant.length;i++) {
+    var k = relevant[i];
+    var relCrit = [];
+    for (var j=0;j<CRITERIA.length;j++) {
+      if (k.crit.indexOf(CRITERIA[j].id)>=0 && aandachtIds.indexOf(CRITERIA[j].id)>=0) relCrit.push(CRITERIA[j]);
+    }
+    html += '<div class="o-kaart">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">';
+    html += '<div><div class="o-code">'+k.code+'</div><div class="o-titel">'+k.titel+'</div></div>';
+    html += '<span class="badge b-ov" style="font-size:9px;margin-left:6px">Aandacht</span>';
+    html += '</div><div class="o-tags">';
+    for (var j=0;j<relCrit.length;j++) {
+      html += '<span class="o-tag">'+relCrit[j].nr+'. '+relCrit[j].title+'</span>';
+    }
+    html += '</div></div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+// ═══ BUILD RESULTAAT ═══
+function buildResultaat() {
+  syncInfo();
+  var positions = getPositions();
+  var filled=[], aIds=[];
+  for (var i=0;i<CRITERIA.length;i++) {
+    var sc=form.scores[CRITERIA[i].id];
+    if (sc) { filled.push(sc); if (sc==='ov') aIds.push(CRITERIA[i].id); }
+  }
+  var html = '';
+
+  // Totaal
+  html += '<div class="card">';
+  html += '<div class="card-title">Totaalgemiddelde</div>';
+  if (filled.length) {
+    var ord=oo(filled), num=ooNum(filled);
+    var nA=0; for(var i=0;i<filled.length;i++) if(filled[i]==='ov') nA++;
+    var forced = nA>filled.length/2;
+    html += '<div class="result-big" style="color:'+ooBg(ord)+'">'+((!forced&&num)?num.toFixed(2)+' – ':'')+SL[ord]+'</div>';
+    html += '<div class="result-lbl">'+filled.length+' van '+CRITERIA.length+' criteria beoordeeld'+(forced?' · meer dan helft Aandacht':'')+'</div>';
+  } else {
+    html += '<div class="result-lbl">Beoordeel criteria voor een score</div>';
+  }
+  html += '<div style="margin-top:12px">';
+  for (var i=0;i<CRITERIA.length;i++) {
+    var c=CRITERIA[i], sc2=form.scores[c.id];
+    var pct=sc2?Math.round(SV[sc2]/3*100):0;
+    var col=sc2==='goed'?'var(--goed)':sc2==='vol'?'var(--vol)':sc2==='ov'?'var(--ov)':'var(--border)';
+    html += '<div class="mbar-wrap"><div class="mbar-meta"><span>'+c.nr+'. '+c.title+'</span>';
+    html += sc2?'<span class="'+badgeCls(sc2)+'">'+SL[sc2]+'</span>':'<span style="color:var(--text3)">–</span>';
+    html += '</div><div class="mbar-bg"><div class="mbar-fill" style="width:'+pct+'%;background:'+col+'"></div></div></div>';
+  }
+  html += '</div></div>';
+
+  // Per persoon
+  if (positions.length) {
+    html += '<div class="card"><div class="card-title">Per persoon</div>';
+    for (var i=0;i<positions.length;i++) {
+      var p=positions[i], pList=[];
+      for (var j=0;j<CRITERIA.length;j++) { var ps=form.pscores[CRITERIA[j].id+'_'+p.pos]; if(ps) pList.push(ps); }
+      var po=oo(pList), pn=ooNum(pList);
+      var nA2=0; for(var k=0;k<pList.length;k++) if(pList[k]==='ov') nA2++;
+      var forced2=pList.length&&nA2>pList.length/2;
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--border)">';
+      html += '<span style="font-size:12px"><b>'+p.pos+'</b> – '+p.name+'</span>';
+      html += po?'<span class="'+badgeCls(po)+'">'+((!forced2&&pn)?pn.toFixed(2)+' – ':'')+SL[po]+' ('+pList.length+'/'+CRITERIA.length+')</span>':'<span style="font-size:11px;color:var(--text3)">–</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  // Aandachtspunten groep
+  if (aIds.length) {
+    html += '<div class="a-card"><div class="card-title">&#9888; Aandachtspunten groep</div>';
+    for (var i=0;i<CRITERIA.length;i++) {
+      var c=CRITERIA[i];
+      if (form.scores[c.id]!=='ov') continue;
+      html += '<div class="a-item"><b>'+c.nr+'. '+c.title+'</b>';
+      if (form.notes[c.id]) html += '<div style="opacity:.8">'+form.notes[c.id]+'</div>';
+      for (var j=0;j<positions.length;j++) {
+        var p=positions[j];
+        if (form.pscores[c.id+'_'+p.pos]==='ov') {
+          var pnote=form.pnotes[c.id+'_'+p.pos]||'';
+          html += '<div>– '+p.name+(pnote?': '+pnote:'')+'</div>';
+        }
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+    html += buildOefen(aIds);
+  }
+
+  // Per-persoon oefenkaarten (ook als groep Goed/Voldoende is)
+  for (var i=0;i<positions.length;i++) {
+    var p=positions[i];
+    var persAIds=[];
+    for (var j=0;j<CRITERIA.length;j++) {
+      if (form.pscores[CRITERIA[j].id+'_'+p.pos]==='ov') persAIds.push(CRITERIA[j].id);
+    }
+    if (!persAIds.length) continue;
+    // Alleen tonen als deze criteria NIET al in groepsaandacht zitten
+    var nieuweIds=[];
+    for (var j=0;j<persAIds.length;j++) {
+      if (aIds.indexOf(persAIds[j])<0) nieuweIds.push(persAIds[j]);
+    }
+    if (!nieuweIds.length) continue; // al gedekt door groepsadvies
+    html += '<div class="o-card">';
+    html += '<div class="card-title">&#127919; Oefenadvies voor '+p.name+'</div>';
+    html += '<div style="font-size:11px;color:var(--vol-txt);margin-bottom:8px;opacity:.8">Individuele aandachtspunten (groep scoort voldoende/goed):</div>';
+    // toon de aandacht-criteria voor deze persoon
+    html += '<div style="background:var(--ov-bg);border:1px solid var(--ov);border-radius:var(--rs);padding:8px 10px;margin-bottom:10px;">';
+    for (var j=0;j<nieuweIds.length;j++) {
+      var crit=null; for(var k=0;k<CRITERIA.length;k++) if(CRITERIA[k].id===nieuweIds[j]) crit=CRITERIA[k];
+      if (!crit) continue;
+      var pnote2=form.pnotes[crit.id+'_'+p.pos]||'';
+      html += '<div style="font-size:12px;color:var(--ov-txt);padding:3px 0;border-top:1px solid rgba(217,119,6,.2)">';
+      html += '<b>'+crit.nr+'. '+crit.title+'</b>'+(pnote2?'<div style="opacity:.8">'+pnote2+'</div>':'');
+      html += '</div>';
+    }
+    html += '</div>';
+    // oefenkaarten voor die criteria
+    var kaarten=[];
+    for (var j=0;j<KAARTEN.length;j++) {
+      for (var k=0;k<KAARTEN[j].crit.length;k++) {
+        if (nieuweIds.indexOf(KAARTEN[j].crit[k])>=0) { kaarten.push(KAARTEN[j]); break; }
+      }
+    }
+    for (var j=0;j<kaarten.length;j++) {
+      var kk=kaarten[j];
+      var relCrit=[];
+      for (var k=0;k<CRITERIA.length;k++) {
+        if (kk.crit.indexOf(CRITERIA[k].id)>=0 && nieuweIds.indexOf(CRITERIA[k].id)>=0) relCrit.push(CRITERIA[k]);
+      }
+      html += '<div class="o-kaart"><div class="o-code">'+kk.code+'</div><div class="o-titel">'+kk.titel+'</div>';
+      html += '<div class="o-tags" style="margin-top:6px">';
+      for (var k=0;k<relCrit.length;k++) html += '<span class="o-tag">'+relCrit[k].nr+'. '+relCrit[k].title+'</span>';
+      html += '</div></div>';
+    }
+    html += '</div>';
+  }
+
+  // Eindopmerking
+  html += '<div class="card"><div class="card-title">Eindopmerking</div>';
+  html += '<textarea class="inp" rows="3" placeholder="Algemene bevindingen..." onchange="form.eindopmerking=this.value">'+form.eindopmerking+'</textarea></div>';
+  html += '<button class="btn btn-primary" onclick="saveSession()">💾 Training opslaan</button>';
+
+  document.getElementById('res-content').innerHTML = html;
+}
+
+// ═══ SAVE SESSION ═══
+function saveSession() {
+  syncInfo();
+  var s = JSON.parse(JSON.stringify(form));
+  s.id = Date.now().toString();
+  s.savedAt = new Date().toISOString();
+  sessions.unshift(s);
+  saveSessions();
+  alert('Training opgeslagen!');
+  showScreen('scr-home');
+}
+
+// ═══ HISTORY ═══
+function renderHistory() {
+  var el = document.getElementById('history-content');
+  var critAvgs = [];
+  for (var i=0;i<CRITERIA.length;i++) {
+    var c=CRITERIA[i], vals=[];
+    for (var j=0;j<sessions.length;j++) if(sessions[j].scores[c.id]) vals.push(sessions[j].scores[c.id]);
+    critAvgs.push({c:c, oo:oo(vals), num:ooNum(vals), count:vals.length});
+  }
+  // Person avgs
+  var nameMap={};
+  for (var i=0;i<sessions.length;i++) {
+    for (var j=0;j<POSITIONS.length;j++) {
+      var n=sessions[i].bez&&sessions[i].bez[POSITIONS[j]];
+      if (n&&n.trim()) { var nm=n.trim(); if (!nameMap[nm]) nameMap[nm]=[]; }
+    }
+  }
+  var personAvgs=[];
+  var names=Object.keys(nameMap);
+  for (var i=0;i<names.length;i++) {
+    var nm=names[i], vals=[];
+    for (var j=0;j<sessions.length;j++) {
+      for (var k=0;k<POSITIONS.length;k++) {
+        if (sessions[j].bez&&sessions[j].bez[POSITIONS[k]]===nm) {
+          for (var l=0;l<CRITERIA.length;l++) {
+            var ps=sessions[j].pscores&&sessions[j].pscores[CRITERIA[l].id+'_'+POSITIONS[k]];
+            if (ps) vals.push(ps);
+          }
+        }
+      }
+    }
+    if (vals.length) personAvgs.push({name:nm, oo:oo(vals), num:ooNum(vals), count:vals.length});
+  }
+
+  var html='';
+
+  if (sessions.length>=2) {
+    // Gemiddelde criteria
+    html += '<div class="card"><div class="card-title">Gemiddelde over '+sessions.length+' trainingen</div>';
+    for (var i=0;i<critAvgs.length;i++) {
+      var x=critAvgs[i], xoo=x.oo;
+      var pct=xoo?Math.round(SV[xoo]/3*100):0;
+      var col=xoo==='goed'?'var(--goed)':xoo==='vol'?'var(--vol)':xoo==='ov'?'var(--ov)':'var(--border)';
+      html += '<div class="mbar-wrap"><div class="mbar-meta"><span>'+x.c.nr+'. '+x.c.title+'</span>';
+      html += xoo?'<span class="'+badgeCls(xoo)+'">'+(x.num?x.num.toFixed(1)+' – ':'')+SL[xoo]+' ('+x.count+'x)</span>':'<span style="color:var(--text3)">–</span>';
+      html += '</div><div class="mbar-bg"><div class="mbar-fill" style="width:'+pct+'%;background:'+col+'"></div></div></div>';
+    }
+    html += '</div>';
+
+    // Persoon gemiddelden
+    if (personAvgs.length) {
+      html += '<div class="card"><div class="card-title">Gemiddelde per persoon</div>';
+      for (var i=0;i<personAvgs.length;i++) {
+        var x=personAvgs[i];
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--border)">';
+        html += '<span style="font-size:12px;font-weight:600">'+x.name+'</span>';
+        html += x.oo?'<span class="'+badgeCls(x.oo)+'">'+(x.num?x.num.toFixed(1)+' – ':'')+SL[x.oo]+'</span>':'';
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+
+    // Structureel oefenadvies
+    var structA=[];
+    for (var i=0;i<critAvgs.length;i++) if (critAvgs[i].oo==='ov') structA.push(critAvgs[i].c.id);
+    if (structA.length) {
+      html += '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Structureel oefenadvies</div>';
+      html += buildOefen(structA);
+    }
+  }
+
+  // Sessielijst
+  html += '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Alle trainingen ('+sessions.length+')</div>';
+  if (!sessions.length) { html += '<div class="empty">Nog geen trainingen opgeslagen.</div>'; }
+  for (var i=0;i<sessions.length;i++) {
+    var sess=sessions[i], r=sessOo(sess);
+    var nCrit=0; for(var j=0;j<CRITERIA.length;j++) if(sess.scores[CRITERIA[j].id]) nCrit++;
+    html += '<div class="sess-row"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">';
+    html += '<div><div style="font-size:13px;font-weight:700">'+(sess.datum||'–')+'</div>';
+    html += '<div class="sess-meta">'+(sess.wn1||'–')+(sess.wn2?' / '+sess.wn2:'')+'&nbsp;·&nbsp;'+nCrit+'/'+CRITERIA.length+' criteria</div></div>';
+    html += r?'<span class="'+badgeCls(r.ord)+'">'+(r.num?r.num.toFixed(2)+' – ':'')+SL[r.ord]+'</span>':'';
+    html += '</div><div class="sess-actions">';
+    html += '<button onclick="showDetail(\''+sess.id+'\')">Bekijk details</button>';
+    html += '<button class="del-btn" onclick="deleteSession(\''+sess.id+'\')">Verwijder</button>';
+    html += '</div></div>';
+  }
+  el.innerHTML = html;
+}
+
+// ═══ DETAIL ═══
+function showDetail(id) {
+  var s=null; for(var i=0;i<sessions.length;i++) if(sessions[i].id===id){s=sessions[i];break;}
+  if (!s) return;
+  document.getElementById('det-title').textContent = s.datum||'–';
+  var r=sessOo(s);
+  document.getElementById('det-badge').innerHTML = r?'<span class="'+badgeCls(r.ord)+'">'+(r.num?r.num.toFixed(2)+' – ':'')+SL[r.ord]+'</span>':'';
+
+  var positions=[];
+  for (var i=0;i<POSITIONS.length;i++) {
+    var nm=s.bez&&s.bez[POSITIONS[i]];
+    if (nm&&nm.trim()) positions.push({pos:POSITIONS[i],name:nm.trim()});
+  }
+
+  var html='';
+  // Info
+  html += '<div class="card"><div class="card-sub">Algemeen</div>';
+  html += '<div style="font-size:12px;color:var(--text2)">Waarnemer: '+(s.wn1||'–')+(s.wn2?' / '+s.wn2:'')+'</div>';
+  if (positions.length) {
+    html += '<div style="font-size:12px;color:var(--text2);margin-top:4px">Bezetting: ';
+    html += positions.map(function(p){return p.pos+'='+p.name;}).join(', ')+'</div>';
+  }
+  html += '</div>';
+
+  // Criteria
+  html += '<div class="card"><div class="card-sub">Criteria</div>';
+  var aIds=[];
+  for (var i=0;i<CRITERIA.length;i++) {
+    var c=CRITERIA[i], sc=s.scores[c.id];
+    if (sc==='ov') aIds.push(c.id);
+    var pct=sc?Math.round(SV[sc]/3*100):0;
+    var col=sc==='goed'?'var(--goed)':sc==='vol'?'var(--vol)':sc==='ov'?'var(--ov)':'var(--border)';
+    html += '<div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">';
+    html += '<div style="font-size:12px;font-weight:700">'+c.nr+'. '+c.title+'</div>';
+    html += sc?'<span class="'+badgeCls(sc)+'">'+SL[sc]+'</span>':'';
+    html += '</div>';
+    html += '<div class="mbar-bg"><div class="mbar-fill" style="width:'+pct+'%;background:'+col+'"></div></div>';
+    if (s.notes&&s.notes[c.id]) html += '<div style="font-size:11px;color:var(--text2);margin-top:3px">'+s.notes[c.id]+'</div>';
+    if (s.tops&&s.tops[c.id])   html += '<div style="font-size:11px;color:var(--goed-txt);margin-top:2px">👍 '+s.tops[c.id]+'</div>';
+    if (s.tips&&s.tips[c.id])   html += '<div style="font-size:11px;color:var(--vol-txt);margin-top:2px">💡 '+s.tips[c.id]+'</div>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // Per persoon
+  if (positions.length) {
+    html += '<div class="card"><div class="card-sub">Per persoon</div>';
+    for (var i=0;i<positions.length;i++) {
+      var p=positions[i], pList=[];
+      for (var j=0;j<CRITERIA.length;j++) { var ps=s.pscores&&s.pscores[CRITERIA[j].id+'_'+p.pos]; if(ps) pList.push(ps); }
+      var po=oo(pList), pn=ooNum(pList);
+      var nA3=0; for(var k=0;k<pList.length;k++) if(pList[k]==='ov') nA3++;
+      var forced3=pList.length&&nA3>pList.length/2;
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--border)">';
+      html += '<span style="font-size:12px"><b>'+p.pos+'</b> – '+p.name+'</span>';
+      html += po?'<span class="'+badgeCls(po)+'">'+((!forced3&&pn)?pn.toFixed(2)+' – ':'')+SL[po]+'</span>':'<span style="font-size:11px;color:var(--text3)">–</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+
+  // Oefenkaarten
+  if (aIds.length) {
+    html += '<div class="a-card"><div class="card-title">⚠ Aandachtspunten</div>';
+    for (var i=0;i<CRITERIA.length;i++) {
+      if (s.scores[CRITERIA[i].id]!=='ov') continue;
+      html += '<div class="a-item"><b>'+CRITERIA[i].nr+'. '+CRITERIA[i].title+'</b>';
+      if (s.notes&&s.notes[CRITERIA[i].id]) html += '<div style="opacity:.8">'+s.notes[CRITERIA[i].id]+'</div>';
+      for (var j=0;j<positions.length;j++) {
+        var p=positions[j];
+        if (s.pscores&&s.pscores[CRITERIA[i].id+'_'+p.pos]==='ov') {
+          var pnote=s.pnotes&&s.pnotes[CRITERIA[i].id+'_'+p.pos]||'';
+          html += '<div>– '+p.name+(pnote?': '+pnote:'')+'</div>';
+        }
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+    html += buildOefen(aIds);
+  }
+
+  if (s.eindopmerking) {
+    html += '<div class="card"><div class="card-sub">Eindopmerking</div>';
+    html += '<div style="font-size:12px;color:var(--text2);line-height:1.6">'+s.eindopmerking+'</div></div>';
+  }
+
+  html += '<button class="btn btn-danger" onclick="deleteSession(\''+s.id+'\');showScreen(\'scr-history\')">Training verwijderen</button>';
+  document.getElementById('detail-content').innerHTML = html;
+  showScreen('scr-detail');
+}
+
+// ═══ DELETE ═══
+function deleteSession(id) {
+  if (!confirm('Training verwijderen?')) return;
+  sessions = sessions.filter(function(s){return s.id!==id;});
+  saveSessions();
+  renderHistory();
+}
+
+// ═══ INIT ═══
+loadSessions();
+renderHome();
+</script>
+</body>
+</html>
